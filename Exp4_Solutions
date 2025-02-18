@@ -1,0 +1,209 @@
+// EXP 04 EASY LEVEL SOLUTION (EmployeeManager.java)
+
+import java.util.*;
+
+class Employee {
+    int id;
+    String name;
+    double salary;
+
+    Employee(int id, String name, double salary) {
+        this.id = id;
+        this.name = name;
+        this.salary = salary;
+    }
+
+    public String toString() {
+        return "ID: " + id + ", Name: " + name + ", Salary: " + salary;
+    }
+}
+
+public class EmployeeManager {
+    static List<Employee> employees = new ArrayList<>();
+
+    static void addEmployee(int id, String name, double salary) {
+        employees.add(new Employee(id, name, salary));
+    }
+
+    static void updateEmployee(int id, String newName, double newSalary) {
+        for (Employee e : employees) {
+            if (e.id == id) {
+                e.name = newName;
+                e.salary = newSalary;
+                return;
+            }
+        }
+    }
+
+    static void removeEmployee(int id) {
+        employees.removeIf(e -> e.id == id);
+    }
+
+    static Employee searchEmployee(int id) {
+        for (Employee e : employees) {
+            if (e.id == id) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("1. Add Employee\n2. Update Employee\n3. Remove Employee\n4. Search Employee\n5. Exit");
+            int choice = scanner.nextInt();
+            if (choice == 5) break;
+            switch (choice) {
+                case 1:
+                    System.out.println("Enter ID, Name, and Salary:");
+                    addEmployee(scanner.nextInt(), scanner.next(), scanner.nextDouble());
+                    break;
+                case 2:
+                    System.out.println("Enter ID, New Name, and New Salary:");
+                    updateEmployee(scanner.nextInt(), scanner.next(), scanner.nextDouble());
+                    break;
+                case 3:
+                    System.out.println("Enter ID to remove:");
+                    removeEmployee(scanner.nextInt());
+                    break;
+                case 4:
+                    System.out.println("Enter ID to search:");
+                    Employee e = searchEmployee(scanner.nextInt());
+                    System.out.println(e != null ? e : "Employee not found");
+                    break;
+                default:
+                    System.out.println("Invalid choice");
+            }
+        }
+        scanner.close();
+    }
+}
+
+// EXP 04 MEDIUM LEVEL SOLUTION (CardCollection.java)
+
+import java.util.*;
+
+class Card {
+    private String symbol;
+    private int number;
+
+    public Card(String symbol, int number) {
+        this.symbol = symbol;
+        this.number = number;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public String toString() {
+        return "Card{" + "symbol='" + symbol + '\'' + ", number=" + number + '}';
+    }
+}
+
+public class CardCollection {
+    private Collection<Card> cards;
+
+    public CardCollection() {
+        cards = new ArrayList<>();
+    }
+
+    public void addCard(String symbol, int number) {
+        cards.add(new Card(symbol, number));
+    }
+
+    public List<Card> findCardsBySymbol(String symbol) {
+        List<Card> result = new ArrayList<>();
+        for (Card card : cards) {
+            if (card.getSymbol().equalsIgnoreCase(symbol)) {
+                result.add(card);
+            }
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        CardCollection collection = new CardCollection();
+        collection.addCard("Hearts", 2);
+        collection.addCard("Spades", 5);
+        collection.addCard("Hearts", 10);
+        collection.addCard("Diamonds", 7);
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter symbol to search: ");
+        String symbol = scanner.nextLine();
+        List<Card> foundCards = collection.findCardsBySymbol(symbol);
+
+        if (foundCards.isEmpty()) {
+            System.out.println("No cards found for symbol: " + symbol);
+        } else {
+            System.out.println("Cards found:");
+            for (Card card : foundCards) {
+                System.out.println(card);
+            }
+        }
+    }
+}
+
+
+// EXP 04 HARD LEVEL SOLUTION (TicketBookingApp.java)
+
+import java.util.concurrent.*;
+
+class TicketBookingSystem {
+    private final boolean[] seats;
+
+    public TicketBookingSystem(int totalSeats) {
+        this.seats = new boolean[totalSeats];
+    }
+
+    public synchronized boolean bookSeat(int seatNumber, String user) {
+        if (seatNumber < 0 || seatNumber >= seats.length || seats[seatNumber]) {
+            return false;
+        }
+        seats[seatNumber] = true;
+        System.out.println(user + " successfully booked seat " + seatNumber);
+        return true;
+    }
+}
+
+class BookingThread extends Thread {
+    private final TicketBookingSystem system;
+    private final int seatNumber;
+    private final String user;
+
+    public BookingThread(TicketBookingSystem system, int seatNumber, String user, int priority) {
+        this.system = system;
+        this.seatNumber = seatNumber;
+        this.user = user;
+        setPriority(priority);
+    }
+
+    public void run() {
+        system.bookSeat(seatNumber, user);
+    }
+}
+
+public class TicketBookingApp {
+    public static void main(String[] args) {
+        TicketBookingSystem system = new TicketBookingSystem(10);
+        Thread vip1 = new BookingThread(system, 3, "VIP_User1", Thread.MAX_PRIORITY);
+        Thread vip2 = new BookingThread(system, 5, "VIP_User2", Thread.MAX_PRIORITY);
+        Thread user1 = new BookingThread(system, 3, "Regular_User1", Thread.NORM_PRIORITY);
+        Thread user2 = new BookingThread(system, 5, "Regular_User2", Thread.NORM_PRIORITY);
+        Thread user3 = new BookingThread(system, 7, "Regular_User3", Thread.MIN_PRIORITY);
+        vip1.start();
+        vip2.start();
+        user1.start();
+        user2.start();
+        user3.start();
+    }
+}
+
+
